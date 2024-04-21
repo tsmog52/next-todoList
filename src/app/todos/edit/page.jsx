@@ -1,19 +1,21 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import Link from "next/link";
 import PageTitle from "@/app/components/PageTitle";
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { db } from "../../../../firebase"; 
+import { useRecoilValue } from 'recoil';
+import { db } from "../../../../firebase";
 import { doc, updateDoc } from "firebase/firestore";
-import { editTodoIdState } from "@/app/states/editTodoIdState";
+import { editTodoIdState, editTodoTitleState } from "@/app/states/editTodoState";
+import { useRouter } from "next/navigation";
 
-const page = () => {
+const Edit = () => {
+  const router = useRouter();
   const inputRef = useRef(null);
-  const editTodoId = useRecoilValue(editTodoIdState)
+  const editTodoId = useRecoilValue(editTodoIdState);
+  const todotitle = useRecoilValue(editTodoTitleState);
   //inputの値
-  const [newInputValue, setNewInputValue] = useState("")
-  
+  const [newInputValue, setNewInputValue] = useState(todotitle)
+
   const handleEdit = (e) => {
     setNewInputValue(e.target.value)
   }
@@ -22,7 +24,7 @@ const page = () => {
     title: newInputValue,
   };
 
-  const handleClick = async () => { 
+  const handleClick = async () => {
     try {
       const newTitle = doc(db, "todos", editTodoId);
       if(newInputValue !== "") {
@@ -33,6 +35,7 @@ const page = () => {
     } catch(error) {
       console.log(error.message);
     }
+    router.push("/todos")
   }
 
   useEffect(() => {
@@ -42,24 +45,24 @@ const page = () => {
   return (
     <div>
       <PageTitle title="TODO編集FORM" />
-      <input 
-        type="text" 
-        ref={inputRef}
-        value={newInputValue}
-        onChange={handleEdit}
-        className="p-1 bg-gray-100 rounded-md mb-2"
-      />
-      <Link 
-        href="/todos"
-        className="px-3 py-2 ml-2 bg-blue-400 rounded-md text-white hover:bg-blue-500"
-        onClick={handleClick}
-      >
-        edit
-      </Link>
+      <div className="flex justify-center">
+        <input
+          type="text"
+          ref={inputRef}
+          value={newInputValue}
+          onChange={handleEdit}
+          className="p-2 bg-gray-100 rounded-md  mr-2"
+        />
+        <button
+          onClick={handleClick}
+          text="Edit"
+          className="px-5 font-medium tracking-wide text-gray-800 capitalize transition-colors duration-300 transform bg-gray-400 rounded-lg hover:bg-gray-500 text-white focus:outline-none focus:ring focus:ring-gray-300 focus:ring-opacity-80"
+        >
+          Edit
+        </button>
+      </div>
     </div>
-
   )
 }
 
-
-export default page
+export default Edit
